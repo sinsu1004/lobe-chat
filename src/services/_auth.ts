@@ -1,5 +1,6 @@
 import { JWTPayload, LOBE_CHAT_AUTH_HEADER } from '@/const/auth';
 import { ModelProvider } from '@/libs/agent-runtime';
+import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import { useUserStore } from '@/store/user';
 import { keyVaultsConfigSelectors, userProfileSelectors } from '@/store/user/selectors';
 import { GlobalLLMProviderKey } from '@/types/user/settings';
@@ -93,7 +94,10 @@ export const createHeaderWithAuth = async (params?: AuthParams): Promise<Headers
   let payload = params?.payload || {};
 
   if (params?.provider) {
-    payload = { ...payload, ...getProviderAuthPayload(params?.provider) };
+    const keyVaults = aiProviderSelectors.providerKeyVaults(params?.provider)(
+      useAiInfraStore.getState(),
+    );
+    payload = { ...payload, ...getProviderAuthPayload(params?.provider), ...keyVaults };
   }
 
   const token = await createAuthTokenWithPayload(payload);

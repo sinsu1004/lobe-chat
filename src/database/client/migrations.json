@@ -223,7 +223,10 @@
     "hash": "9646161fa041354714f823d726af27247bcd6e60fa3be5698c0d69f337a5700b"
   },
   {
-    "sql": ["DROP TABLE \"user_budgets\";", "\nDROP TABLE \"user_subscriptions\";"],
+    "sql": [
+      "DROP TABLE \"user_budgets\";",
+      "\nDROP TABLE \"user_subscriptions\";"
+    ],
     "bps": true,
     "folderMillis": 1729699958471,
     "hash": "7dad43a2a25d1aec82124a4e53f8d82f8505c3073f23606c1dc5d2a4598eacf9"
@@ -282,5 +285,16 @@
     "bps": true,
     "folderMillis": 1731858381716,
     "hash": "d8263bfefe296ed366379c7b7fc65195d12e6a1c0a9f1c96097ea28f2123fe50"
+  },
+  {
+    "sql": [
+      "CREATE TABLE \"ai_models\" (\n\t\"id\" varchar(150) NOT NULL,\n\t\"display_name\" varchar(200),\n\t\"description\" text,\n\t\"organization\" varchar(100),\n\t\"enabled\" boolean,\n\t\"provider_id\" varchar(64) NOT NULL,\n\t\"type\" varchar(20) DEFAULT 'chat' NOT NULL,\n\t\"sort\" integer,\n\t\"user_id\" text NOT NULL,\n\t\"pricing\" jsonb,\n\t\"parameters\" jsonb DEFAULT '{}'::jsonb,\n\t\"config\" jsonb,\n\t\"abilities\" jsonb DEFAULT '{}'::jsonb,\n\t\"context_window_tokens\" integer,\n\t\"source\" varchar(20),\n\t\"released_at\" varchar(10),\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"ai_models_id_provider_id_user_id_pk\" PRIMARY KEY(\"id\",\"provider_id\",\"user_id\")\n);\n",
+      "\nCREATE TABLE \"ai_providers\" (\n\t\"id\" varchar(64) NOT NULL,\n\t\"name\" text,\n\t\"user_id\" text NOT NULL,\n\t\"sort\" integer,\n\t\"enabled\" boolean,\n\t\"check_model\" text,\n\t\"logo\" text,\n\t\"sdk_type\" text DEFAULT 'openai',\n\t\"description\" text,\n\t\"enabled_chat_models\" text[],\n\t\"key_vaults\" text,\n\t\"source\" varchar(20),\n\t\"config\" jsonb,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"ai_providers_id_user_id_pk\" PRIMARY KEY(\"id\",\"user_id\")\n);\n",
+      "\nALTER TABLE \"ai_models\" ADD CONSTRAINT \"ai_models_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
+      "\nALTER TABLE \"ai_providers\" ADD CONSTRAINT \"ai_providers_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;"
+    ],
+    "bps": true,
+    "folderMillis": 1735318928770,
+    "hash": "ec3556992eff3a7f0df7944ff5fbdb19c05bc219388aa8ad50beb1c525019b0b"
   }
 ]

@@ -9,6 +9,7 @@ import { LOBE_URL_IMPORT_NAME } from '@/const/url';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useEnabledDataSync } from '@/hooks/useSyncData';
 import { useAgentStore } from '@/store/agent';
+import { useAiInfraStore } from '@/store/aiInfra';
 import { useGlobalStore } from '@/store/global';
 import { systemStatusSelectors } from '@/store/global/selectors';
 import { useServerConfigStore } from '@/store/serverConfig';
@@ -35,6 +36,7 @@ const StoreInitialization = memo(() => {
   const useInitSystemStatus = useGlobalStore((s) => s.useInitSystemStatus);
 
   const useInitAgentStore = useAgentStore((s) => s.useInitAgentStore);
+  const useFetchAiProviderKeyVaults = useAiInfraStore((s) => s.useFetchAiProviderKeyVaults);
 
   // init the system preference
   useInitSystemStatus();
@@ -56,6 +58,9 @@ const StoreInitialization = memo(() => {
 
   // init inbox agent and default agent config
   useInitAgentStore(isLoginOnInit, serverConfig.defaultAgent?.config);
+
+  // TODO: add isLoginOnInit
+  useFetchAiProviderKeyVaults();
 
   // init user state
   useInitUserState(isLoginOnInit, serverConfig, {

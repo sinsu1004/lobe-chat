@@ -16,13 +16,13 @@ import {
 } from '@/libs/agent-runtime';
 import { filesPrompts } from '@/prompts/files';
 import { BuiltinSystemRolePrompts } from '@/prompts/systemRole';
+import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import { useSessionStore } from '@/store/session';
 import { sessionMetaSelectors } from '@/store/session/selectors';
 import { useToolStore } from '@/store/tool';
 import { pluginSelectors, toolSelectors } from '@/store/tool/selectors';
 import { useUserStore } from '@/store/user';
 import {
-  modelConfigSelectors,
   modelProviderSelectors,
   preferenceSelectors,
   userProfileSelectors,
@@ -261,8 +261,8 @@ class ChatService {
     /**
      * Use browser agent runtime
      */
-    const enableFetchOnClient = modelConfigSelectors.isProviderFetchOnClient(provider)(
-      useUserStore.getState(),
+    const enableFetchOnClient = aiProviderSelectors.isProviderFetchOnClient(provider)(
+      useAiInfraStore.getState(),
     );
 
     let fetcher: typeof fetch | undefined = undefined;
