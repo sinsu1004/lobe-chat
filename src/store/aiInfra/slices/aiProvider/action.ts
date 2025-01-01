@@ -1,6 +1,7 @@
 import { SWRResponse, mutate } from 'swr';
 import { StateCreator } from 'zustand/vanilla';
 
+import { isDeprecatedEdition } from '@/const/version';
 import { useClientDataSWR } from '@/libs/swr';
 import { aiProviderService } from '@/services/aiProvider';
 import { AiInfraStore } from '@/store/aiInfra/store';
@@ -32,8 +33,10 @@ export interface AiProviderAction {
   updateAiProviderSort: (items: AiProviderSortMap[]) => Promise<void>;
 
   useFetchAiProviderItem: (id: string) => SWRResponse<AiProviderDetailItem | undefined>;
-  useFetchAiProviderKeyVaults: () => SWRResponse<Record<string, object> | undefined>;
   useFetchAiProviderList: (params?: { suspense?: boolean }) => SWRResponse<AiProviderListItem[]>;
+  useInitAiProviderKeyVaults: (
+    isLoginOnInit: boolean | undefined,
+  ) => SWRResponse<Record<string, object> | undefined>;
 }
 
 export const createAiProviderSlice: StateCreator<
@@ -118,19 +121,6 @@ export const createAiProviderSlice: StateCreator<
         },
       },
     ),
-  useFetchAiProviderKeyVaults: () =>
-    useClientDataSWR<Record<string, object> | undefined>(
-      [FETCH_ENABLED_AI_PROVIDER_KEY_VAULTS_KEY],
-      () => aiProviderService.getAiProviderKeyVaults(),
-      {
-        onSuccess: (data) => {
-          if (!data) return;
-
-          set({ aiProviderKeyVaults: data }, false, 'useFetchAiProviderKeyVaults');
-        },
-      },
-    ),
-
   useFetchAiProviderList: () =>
     useClientDataSWR<AiProviderListItem[]>(
       FETCH_AI_PROVIDER_LIST_KEY,
@@ -148,6 +138,19 @@ export const createAiProviderSlice: StateCreator<
           }
 
           set({ aiProviderList: data }, false, 'useFetchAiProviderList/refresh');
+        },
+      },
+    ),
+
+  useInitAiProviderKeyVaults: (isLoginOnInit) =>
+    useClientDataSWR<Record<string, object> | undefined>(
+      isLoginOnInit && !isDeprecatedEdition ? [FETCH_ENABLED_AI_PROVIDER_KEY_VAULTS_KEY] : null,
+      () => aiProviderService.getAiProviderKeyVaults(),
+      {
+        onSuccess: (data) => {
+          if (!data) return;
+
+          set({ aiProviderKeyVaults: data }, false, 'useFetchAiProviderKeyVaults');
         },
       },
     ),

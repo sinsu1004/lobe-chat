@@ -36,7 +36,7 @@ const StoreInitialization = memo(() => {
   const useInitSystemStatus = useGlobalStore((s) => s.useInitSystemStatus);
 
   const useInitAgentStore = useAgentStore((s) => s.useInitAgentStore);
-  const useFetchAiProviderKeyVaults = useAiInfraStore((s) => s.useFetchAiProviderKeyVaults);
+  const useInitAiProviderKeyVaults = useAiInfraStore((s) => s.useInitAiProviderKeyVaults);
 
   // init the system preference
   useInitSystemStatus();
@@ -59,8 +59,8 @@ const StoreInitialization = memo(() => {
   // init inbox agent and default agent config
   useInitAgentStore(isLoginOnInit, serverConfig.defaultAgent?.config);
 
-  // TODO: add isLoginOnInit
-  useFetchAiProviderKeyVaults();
+  // init user provider key vaults
+  useInitAiProviderKeyVaults(isLoginOnInit);
 
   // init user state
   useInitUserState(isLoginOnInit, serverConfig, {
