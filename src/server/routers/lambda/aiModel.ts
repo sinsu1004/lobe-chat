@@ -1,27 +1,33 @@
 import { z } from 'zod';
 
+import { AiInfraRepos } from '@/database/repositories/aiInfra';
 import { serverDB } from '@/database/server';
 import { AiModelModel } from '@/database/server/models/aiModel';
 import { UserModel } from '@/database/server/models/user';
 import { authedProcedure, router } from '@/libs/trpc';
+import { getServerGlobalConfig } from '@/server/globalConfig';
 import { KeyVaultsGateKeeper } from '@/server/modules/KeyVaultsEncrypt';
 import {
-  AIChatModelCard,
-  AiModelSourceEnum,
   AiProviderModelListItem,
   CreateAiModelSchema,
   ToggleAiModelEnableSchema,
   UpdateAiModelSchema,
 } from '@/types/aiModel';
-import { mergeArrayById } from '@/utils/merge';
+import { ProviderConfig } from '@/types/user/settings';
 
 const aiModelProcedure = authedProcedure.use(async (opts) => {
   const { ctx } = opts;
 
   const gateKeeper = await KeyVaultsGateKeeper.initWithEnvKey();
+  const { languageModel } = getServerGlobalConfig();
 
   return opts.next({
     ctx: {
+      aiInfraRepos: new AiInfraRepos(
+        serverDB,
+        ctx.userId,
+        languageModel as Record<string, ProviderConfig>,
+      ),
       aiModelModel: new AiModelModel(serverDB, ctx.userId),
       gateKeeper,
       userModel: new UserModel(serverDB, ctx.userId),
@@ -34,6 +40,7 @@ export const aiModelRouter = router({
     .input(
       z.object({
         id: z.string(),
+        // TODO: 补齐校验 Schema
         models: z.array(z.any()),
       }),
     )
@@ -85,22 +92,8 @@ export const aiModelRouter = router({
 
   getAiProviderModelList: aiModelProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const aiModels = await ctx.aiModelModel.getModelListByProviderId(input.id);
-
-      let defaultModels: AiProviderModelListItem[] = [];
-      try {
-        const { default: providerModels } = await import(`@/config/aiModels/${input.id}`);
-        defaultModels = (providerModels as AIChatModelCard[]).map<AiProviderModelListItem>((m) => ({
-          ...m,
-          enabled: m.enabled || false,
-          source: AiModelSourceEnum.Builtin,
-        }));
-      } catch {
-        // maybe provider id not exist
-      }
-
-      return mergeArrayById(defaultModels, aiModels) as AiProviderModelListItem[];
+    .query(async ({ ctx, input }): Promise<AiProviderModelListItem[]> => {
+      return ctx.aiInfraRepos.getAiProviderModelList(input.id);
     }),
 
   removeAiModel: aiModelProcedure

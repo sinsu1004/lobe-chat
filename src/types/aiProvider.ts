@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { AiModelSourceType, AiModelType, ModelAbilities } from '@/types/aiModel';
 import { SmoothingParams } from '@/types/llm';
 
 export const AiProviderSourceEnum = {
@@ -157,4 +158,27 @@ export type UpdateAiProviderConfigParams = z.infer<typeof UpdateAiProviderConfig
 export interface AiProviderSortMap {
   id: string;
   sort: number;
+}
+
+// --------
+
+export interface EnabledProvider {
+  id: string;
+  name?: string;
+  source: AiModelSourceType;
+}
+
+export interface EnabledAiModel {
+  abilities: ModelAbilities;
+  contextWindowTokens?: number;
+  displayName?: string;
+  id: string;
+  providerId: string;
+  type: AiModelType;
+}
+
+export interface AiProviderInitState {
+  enabledAiModels: EnabledAiModel[];
+  enabledAiProviders: EnabledProvider[];
+  keyVaults: Record<string, object>;
 }

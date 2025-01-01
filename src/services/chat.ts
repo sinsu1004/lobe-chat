@@ -83,7 +83,7 @@ interface CreateAssistantMessageStream extends FetchSSEOptions {
  */
 export function initializeWithClientStore(provider: string, payload: any) {
   // add auth payload
-  const providerAuthPayload = getProviderAuthPayload(provider);
+  const providerAuthPayload = getProviderAuthPayload(provider, payload);
   const commonOptions = {
     // Some provider base openai sdk, so enable it run on browser
     dangerouslyAllowBrowser: true,

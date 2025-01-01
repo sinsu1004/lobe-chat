@@ -82,6 +82,22 @@ export class AiModelModel {
     return result as AiProviderModelListItem[];
   };
 
+  getEnabledModels = async () => {
+    return this.db
+      .select({
+        abilities: aiModels.abilities,
+        contextWindowTokens: aiModels.contextWindowTokens,
+        displayName: aiModels.displayName,
+        enabled: aiModels.enabled,
+        id: aiModels.id,
+        providerId: aiModels.providerId,
+        source: aiModels.source,
+        type: aiModels.type,
+      })
+      .from(aiModels)
+      .where(and(eq(aiModels.userId, this.userId), eq(aiModels.enabled, true)));
+  };
+
   findById = async (id: string) => {
     return this.db.query.aiModels.findFirst({
       where: and(eq(aiModels.id, id), eq(aiModels.userId, this.userId)),

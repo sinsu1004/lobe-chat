@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { DEFAULT_MODEL_PROVIDER_LIST } from '@/config/modelProviders';
+import { AiInfraRepos } from '@/database/repositories/aiInfra';
 import { serverDB } from '@/database/server';
 import { AiProviderModel } from '@/database/server/models/aiProvider';
 import { UserModel } from '@/database/server/models/user';
@@ -9,20 +9,25 @@ import { getServerGlobalConfig } from '@/server/globalConfig';
 import { KeyVaultsGateKeeper } from '@/server/modules/KeyVaultsEncrypt';
 import {
   AiProviderDetailItem,
-  AiProviderListItem,
+  AiProviderInitState,
   CreateAiProviderSchema,
   UpdateAiProviderConfigSchema,
 } from '@/types/aiProvider';
 import { ProviderConfig } from '@/types/user/settings';
-import { merge, mergeArrayById } from '@/utils/merge';
 
 const aiProviderProcedure = authedProcedure.use(async (opts) => {
   const { ctx } = opts;
 
-  const gateKeeper = await KeyVaultsGateKeeper.initWithEnvKey();
+  const { languageModel } = getServerGlobalConfig();
 
+  const gateKeeper = await KeyVaultsGateKeeper.initWithEnvKey();
   return opts.next({
     ctx: {
+      aiInfraRepos: new AiInfraRepos(
+        serverDB,
+        ctx.userId,
+        languageModel as Record<string, ProviderConfig>,
+      ),
       aiProviderModel: new AiProviderModel(serverDB, ctx.userId),
       gateKeeper,
       userModel: new UserModel(serverDB, ctx.userId),
@@ -47,42 +52,19 @@ export const aiProviderRouter = router({
       return ctx.aiProviderModel.getAiProviderById(input.id, KeyVaultsGateKeeper.getUserKeyVaults);
     }),
 
-  getAiProviderKeyVaults: aiProviderProcedure.query(async ({ ctx }) => {
-    return ctx.aiProviderModel.getAiProviderKeyVaults(KeyVaultsGateKeeper.getUserKeyVaults);
+  getAiProviderList: aiProviderProcedure.query(async ({ ctx }) => {
+    return await ctx.aiInfraRepos.getAiProviderList();
   }),
 
-  getAiProviderList: aiProviderProcedure.query(async ({ ctx }) => {
-    const { languageModel } = getServerGlobalConfig();
-    const userSettings = await ctx.userModel.getUserSettings();
-    const mergedLanguageModel = merge(languageModel, userSettings?.languageModel || {}) as Record<
-      string,
-      ProviderConfig
-    >;
+  initAiProvidersState: aiProviderProcedure.query(async ({ ctx }): Promise<AiProviderInitState> => {
+    const keyVaults = await ctx.aiProviderModel.getAiProviderKeyVaults(
+      KeyVaultsGateKeeper.getUserKeyVaults,
+    );
+    const enabledAiProviders = await ctx.aiInfraRepos.getEnabledProviderList();
 
-    const userProviders = await ctx.aiProviderModel.getAiProviderList();
-    // 1. 先创建一个基于 DEFAULT_MODEL_PROVIDER_LIST id 顺序的映射
-    const orderMap = new Map(DEFAULT_MODEL_PROVIDER_LIST.map((item, index) => [item.id, index]));
+    const enabledAiModels = await ctx.aiInfraRepos.getEnabledModels();
 
-    const builtinProviders = DEFAULT_MODEL_PROVIDER_LIST.map((item) => ({
-      description: item.description,
-      enabled:
-        userProviders.some((provider) => provider.id === item.id && provider.enabled) ||
-        mergedLanguageModel[item.id]?.enabled,
-      id: item.id,
-      name: item.name,
-      source: 'builtin',
-    })) as AiProviderListItem[];
-
-    const mergedProviders = mergeArrayById(builtinProviders, userProviders);
-
-    // 3. 根据 orderMap 排序
-    const sortedProviders = mergedProviders.sort((a, b) => {
-      const orderA = orderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER;
-      const orderB = orderMap.get(b.id) ?? Number.MAX_SAFE_INTEGER;
-      return orderA - orderB;
-    });
-
-    return sortedProviders;
+    return { enabledAiModels, enabledAiProviders, keyVaults };
   }),
 
   removeAiProvider: aiProviderProcedure

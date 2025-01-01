@@ -1,3 +1,4 @@
+import { uniqBy } from 'lodash-es';
 import { SWRResponse, mutate } from 'swr';
 import { StateCreator } from 'zustand/vanilla';
 
@@ -5,8 +6,10 @@ import { isDeprecatedEdition } from '@/const/version';
 import { useClientDataSWR } from '@/libs/swr';
 import { aiProviderService } from '@/services/aiProvider';
 import { AiInfraStore } from '@/store/aiInfra/store';
+import { ModelAbilities } from '@/types/aiModel';
 import {
   AiProviderDetailItem,
+  AiProviderInitState,
   AiProviderListItem,
   AiProviderSortMap,
   AiProviderSourceEnum,
@@ -34,9 +37,13 @@ export interface AiProviderAction {
 
   useFetchAiProviderItem: (id: string) => SWRResponse<AiProviderDetailItem | undefined>;
   useFetchAiProviderList: (params?: { suspense?: boolean }) => SWRResponse<AiProviderListItem[]>;
+  /**
+   * init provider keyVaults and user enabled model list
+   * @param isLoginOnInit
+   */
   useInitAiProviderKeyVaults: (
     isLoginOnInit: boolean | undefined,
-  ) => SWRResponse<Record<string, object> | undefined>;
+  ) => SWRResponse<AiProviderInitState | undefined>;
 }
 
 export const createAiProviderSlice: StateCreator<
@@ -143,14 +150,45 @@ export const createAiProviderSlice: StateCreator<
     ),
 
   useInitAiProviderKeyVaults: (isLoginOnInit) =>
-    useClientDataSWR<Record<string, object> | undefined>(
+    useClientDataSWR<AiProviderInitState | undefined>(
       isLoginOnInit && !isDeprecatedEdition ? [FETCH_ENABLED_AI_PROVIDER_KEY_VAULTS_KEY] : null,
-      () => aiProviderService.getAiProviderKeyVaults(),
+      () => aiProviderService.initAiProvidersState(),
       {
         onSuccess: (data) => {
           if (!data) return;
 
-          set({ aiProviderKeyVaults: data }, false, 'useFetchAiProviderKeyVaults');
+          const getModelListByType = (providerId: string, type: string) => {
+            const models = data.enabledAiModels
+              .filter((model) => model.providerId === providerId && model.type === type)
+              .map((model) => ({
+                abilities: (model.abilities || {}) as ModelAbilities,
+                contextWindowTokens: model.contextWindowTokens,
+                displayName: model.displayName ?? '',
+                id: model.id,
+              }));
+
+            return uniqBy(models, 'id');
+          };
+
+          // 3. 组装最终数据结构
+          const enabledChatModelList = data.enabledAiProviders.map((provider) => ({
+            children: getModelListByType(provider.id, 'chat'),
+            id: provider.id,
+            name: provider.name || provider.id,
+          }));
+
+          console.log(enabledChatModelList);
+
+          set(
+            {
+              aiProviderKeyVaults: data.keyVaults,
+              enabledAiModels: data.enabledAiModels,
+              enabledAiProviders: data.enabledAiProviders,
+              enabledChatModelList,
+            },
+            false,
+            'useInitAiProviderKeyVaults',
+          );
         },
       },
     ),

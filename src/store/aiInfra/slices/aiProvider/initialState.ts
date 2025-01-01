@@ -1,4 +1,10 @@
-import { AiProviderDetailItem, AiProviderListItem } from '@/types/aiProvider';
+import { EnabledProviderWithModels } from '@/types/aiModel';
+import {
+  AiProviderDetailItem,
+  AiProviderListItem,
+  EnabledAiModel,
+  EnabledProvider,
+} from '@/types/aiProvider';
 
 export interface AIProviderState {
   activeAiProvider?: string;
@@ -7,6 +13,10 @@ export interface AIProviderState {
   aiProviderKeyVaults: Record<string, object>;
   aiProviderList: AiProviderListItem[];
   aiProviderLoadingIds: string[];
+  enabledAiModels?: EnabledAiModel[];
+  enabledAiProviders?: EnabledProvider[];
+  // used for select
+  enabledChatModelList?: EnabledProviderWithModels[];
   initAiProviderList: boolean;
   providerSearchKeyword: string;
 }
