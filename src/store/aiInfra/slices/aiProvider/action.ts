@@ -8,6 +8,7 @@ import {
   AiProviderDetailItem,
   AiProviderListItem,
   AiProviderSortMap,
+  AiProviderSourceEnum,
   CreateAiProviderParams,
   UpdateAiProviderConfigParams,
 } from '@/types/aiProvider';
@@ -41,7 +42,7 @@ export const createAiProviderSlice: StateCreator<
   AiProviderAction
 > = (set, get) => ({
   createNewAiProvider: async (params) => {
-    await aiProviderService.createAiProvider(params);
+    await aiProviderService.createAiProvider({ ...params, source: AiProviderSourceEnum.Custom });
     await get().refreshAiProviderList();
   },
   internal_toggleAiProviderLoading: (id, loading) => {

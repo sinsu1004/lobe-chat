@@ -1,7 +1,7 @@
 'use client';
 
 import { ProviderCombine } from '@lobehub/icons';
-import { Form, type FormItemProps, Icon, type ItemGroup, Tooltip } from '@lobehub/ui';
+import { Avatar, Form, type FormItemProps, Icon, type ItemGroup, Tooltip } from '@lobehub/ui';
 import { useDebounceFn } from 'ahooks';
 import { Input, Skeleton, Switch } from 'antd';
 import { createStyles } from 'antd-style';
@@ -17,7 +17,7 @@ import { FORM_STYLE } from '@/const/layoutTokens';
 import { AES_GCM_URL, BASE_PROVIDER_DOC_URL } from '@/const/url';
 import { isServerMode } from '@/const/version';
 import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
-import { ModelProviderCard } from '@/types/llm';
+import { AiProviderDetailItem } from '@/types/aiProvider';
 
 import { KeyVaultsConfigKey, LLMProviderApiTokenKey, LLMProviderBaseUrlKey } from '../../const';
 import Checker from './Checker';
@@ -80,14 +80,14 @@ const useStyles = createStyles(({ css, prefixCls, responsive, token }) => ({
   `,
 }));
 
-export interface ProviderConfigProps extends Omit<ModelProviderCard, 'id' | 'chatModels' | 'url'> {
+export interface ProviderConfigProps extends Omit<AiProviderDetailItem, 'enabled'> {
   apiKeyItems?: FormItemProps[];
   canDeactivate?: boolean;
   checkerItem?: FormItemProps;
   className?: string;
+  enabled?: boolean;
   extra?: ReactNode;
   hideSwitch?: boolean;
-  id: string;
   modelList?: {
     azureDeployName?: boolean;
     notFoundContent?: ReactNode;
@@ -107,7 +107,7 @@ const ProviderConfig = memo<ProviderConfigProps>(
     checkModel,
     canDeactivate = true,
     checkerItem,
-    title,
+    logo,
     defaultShowBrowserRequest,
     disableBrowserRequest,
     className,
@@ -115,6 +115,7 @@ const ProviderConfig = memo<ProviderConfigProps>(
     showAceGcm = true,
     showChecker = true,
     extra,
+    source,
   }) => {
     const { t } = useTranslation('setting');
     const [form] = Form.useForm();
@@ -279,7 +280,18 @@ const ProviderConfig = memo<ProviderConfigProps>(
             ...(enabled ? {} : { filter: 'grayscale(100%)', maxHeight: 24, opacity: 0.66 }),
           }}
         >
-          {title ?? <ProviderCombine provider={id} size={24} />}
+          {source === 'custom' ? (
+            <Flexbox align={'center'} gap={8} horizontal>
+              {logo ? (
+                <Avatar avatar={logo} shape={'circle'} size={32} title={name || id} />
+              ) : (
+                <ProviderCombine provider={'not-exist-provider'} size={24} />
+              )}
+              {name}
+            </Flexbox>
+          ) : (
+            <ProviderCombine provider={id} size={24} />
+          )}
         </Flexbox>
       ),
     };

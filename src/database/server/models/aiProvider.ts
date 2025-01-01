@@ -166,6 +166,7 @@ export class AiProviderModel {
         id: aiProviders.id,
         keyVaults: aiProviders.keyVaults,
         name: aiProviders.name,
+        logo: aiProviders.logo,
         source: aiProviders.source,
       })
       .from(aiProviders)
@@ -181,7 +182,7 @@ export class AiProviderModel {
 
         const resultAgain = await query;
 
-        return {...resultAgain[0]} as unknown as AiProviderDetailItem;
+        return { ...resultAgain[0] } as unknown as AiProviderDetailItem;
       }
 
       throw new Error(`provider ${id} not found`);
@@ -189,7 +190,7 @@ export class AiProviderModel {
 
     const decrypt = decryptor ?? JSON.parse;
 
-    const keyVaults = await decrypt(result.keyVaults);
+    const keyVaults = !!result.keyVaults ? await decrypt(result.keyVaults) : {};
 
     return { ...result, keyVaults } as AiProviderDetailItem;
   };

@@ -19,10 +19,9 @@ export const aiProviders = pgTable(
     checkModel: text('check_model'),
     logo: text('logo'),
     // OpenAI /  Anthropic / Gemini API schema
-    sdkType: text('sdk_type').default('openai'),
+    sdkType: text('sdk_type'),
     description: text('description'),
 
-    enabledChatModels: text('enabled_chat_models').array(),
     // need to be encrypted
     keyVaults: text('key_vaults'),
     source: varchar('source', { enum: ['builtin', 'custom'], length: 20 }),

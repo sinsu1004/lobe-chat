@@ -70,7 +70,8 @@ const Page = async (props: PagePropsWithId) => {
   const params = await props.params;
 
   const builtinProviderCard = DEFAULT_MODEL_PROVIDER_LIST.find((v) => v.id === params.id);
-  if (!!builtinProviderCard) return <ProviderDetail {...builtinProviderCard} />;
+  if (!!builtinProviderCard)
+    return <ProviderDetail config={{}} source={'builtin'} {...builtinProviderCard} />;
 
   if (isServerMode) {
     const { userId } = await getUserAuth();
@@ -82,6 +83,7 @@ const Page = async (props: PagePropsWithId) => {
       KeyVaultsGateKeeper.getUserKeyVaults,
     );
 
+    console.log(userCard);
     if (userCard) return <ProviderDetail {...userCard} />;
   }
 

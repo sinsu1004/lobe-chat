@@ -2,6 +2,12 @@ import { z } from 'zod';
 
 import { SmoothingParams } from '@/types/llm';
 
+export const AiProviderSourceEnum = {
+  Builtin: 'builtin',
+  Custom: 'custom',
+} as const;
+export type AiProviderSourceType = (typeof AiProviderSourceEnum)[keyof typeof AiProviderSourceEnum];
+
 // create
 export const CreateAiProviderSchema = z.object({
   config: z.object({}).passthrough().optional(),
@@ -11,6 +17,7 @@ export const CreateAiProviderSchema = z.object({
   logo: z.string().optional(),
   name: z.string(),
   sdkType: z.enum(['openai', 'anthropic']).optional(),
+  source: z.enum(['builtin', 'custom']),
   // checkModel: z.string().optional(),
   // homeUrl: z.string().optional(),
   // modelsUrl: z.string().optional(),
@@ -27,7 +34,7 @@ export interface AiProviderListItem {
   logo?: string;
   name?: string;
   sort?: number;
-  source: 'builtin' | 'custom';
+  source: AiProviderSourceType;
 }
 
 // Detail Query
@@ -72,7 +79,7 @@ interface AiProviderConfig {
   smoothing?: SmoothingParams;
 }
 
-export interface AiProviderItem {
+export interface AiProviderCard {
   /**
    * the default model that used for connection check
    */
@@ -95,11 +102,6 @@ export interface AiProviderItem {
    * the name show for end user
    */
   name: string;
-  /**
-   * default openai
-   */
-  sdkType?: 'openai' | 'anthropic';
-  source: 'builtin' | 'custom';
 }
 
 export interface AiProviderDetailItem {
@@ -130,7 +132,7 @@ export interface AiProviderDetailItem {
    * default openai
    */
   sdkType?: 'openai' | 'anthropic';
-  source: 'builtin' | 'custom';
+  source: AiProviderSourceType;
 }
 
 // Update

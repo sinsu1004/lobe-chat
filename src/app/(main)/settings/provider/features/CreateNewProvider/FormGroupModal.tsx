@@ -1,11 +1,17 @@
-import { Form } from '@lobehub/ui';
+import { FormModal, Icon } from '@lobehub/ui';
 import type { FormItemProps } from '@lobehub/ui/es/Form/components/FormItem';
-import { App, Button, Input, Radio } from 'antd';
+import { App, Input, Radio } from 'antd';
 import { css, cx } from 'antd-style';
+import { BrainIcon } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
+import {
+  KeyVaultsConfigKey,
+  LLMProviderApiTokenKey,
+  LLMProviderBaseUrlKey,
+} from '@/app/(main)/settings/provider/const';
 import { useAiInfraStore } from '@/store/aiInfra/store';
 import { CreateAiProviderParams } from '@/types/aiProvider';
 
@@ -19,11 +25,12 @@ const formItem = css`
   }
 `;
 
-interface CreateFormProps {
+interface CreateNewProviderProps {
   onClose?: () => void;
+  open?: boolean;
 }
 
-const CreateForm = memo<CreateFormProps>(({ onClose }) => {
+const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
   const { t } = useTranslation('modelProvider');
   const [loading, setLoading] = useState(false);
   const createNewAiProvider = useAiInfraStore((s) => s.createNewAiProvider);
@@ -74,14 +81,15 @@ const CreateForm = memo<CreateFormProps>(({ onClose }) => {
       minWidth: 400,
       name: 'logo',
     },
+  ];
 
+  const configItems: FormItemProps[] = [
     {
       children: (
         <Radio.Group
           options={[
             { label: 'OpenAI', value: 'openai' },
             { label: 'Anthropic', value: 'anthropic' },
-            // { label: 'Ollama', value: 'ollama' },
           ]}
         />
       ),
@@ -98,7 +106,7 @@ const CreateForm = memo<CreateFormProps>(({ onClose }) => {
       ),
       label: t('createNewAiProvider.apiKey.title'),
       minWidth: 400,
-      name: 'apiKey',
+      name: [KeyVaultsConfigKey, LLMProviderApiTokenKey],
       rules: [{ message: t('createNewAiProvider.apiKey.required'), required: true }],
     },
     {
@@ -106,70 +114,35 @@ const CreateForm = memo<CreateFormProps>(({ onClose }) => {
       desc: t('createNewAiProvider.proxyUrl.placeholder'),
       label: t('createNewAiProvider.proxyUrl.title'),
       minWidth: 400,
-      name: 'proxyUrl',
+      name: [KeyVaultsConfigKey, LLMProviderBaseUrlKey],
     },
   ];
 
-  // const configItems: FormItemProps[] = [
-  //   {
-  //     children: (
-  //       <Radio.Group
-  //         options={[
-  //           { label: 'OpenAI', value: 'openai' },
-  //           { label: 'Anthropic', value: 'anthropic' },
-  //           { label: 'Ollama', value: 'ollama' },
-  //         ]}
-  //       />
-  //     ),
-  //     label: t('createNewAiProvider.sdkType.title'),
-  //     name: 'sdkType',
-  //     rules: [{ message: t('createNewAiProvider.sdkType.required'), required: true }],
-  //   },
-  //   {
-  //     children: (
-  //       <Input.Password
-  //         autoComplete={'new-password'}
-  //         placeholder={t('createNewAiProvider.apiKey.placeholder')}
-  //       />
-  //     ),
-  //     label: t('createNewAiProvider.apiKey.title'),
-  //     minWidth: 400,
-  //     name: 'apiKey',
-  //     rules: [{ message: t('createNewAiProvider.apiKey.required'), required: true }],
-  //   },
-  //   {
-  //     children: <Input allowClear placeholder={'https://xxxx-proxy.com/v1'} />,
-  //     desc: t('createNewAiProvider.proxyUrl.placeholder'),
-  //     label: t('createNewAiProvider.proxyUrl.title'),
-  //     minWidth: 400,
-  //     name: 'proxyUrl',
-  //   },
-  // ];
-
   return (
-    <Flexbox gap={8}>
-      {/*<div>{t('createNewAiProvider.basicTitle')}</div>*/}
-      <Form
-        className={cx(formItem)}
-        // form={form}
-        items={basicItems}
-        itemsType={'flat'}
-        onFinish={onFinish}
-      >
-        <Button
-          block
-          htmlType={'submit'}
-          loading={loading}
-          style={{ marginTop: 16 }}
-          type={'primary'}
-        >
-          {t('createNewAiProvider.confirm')}
-        </Button>
-      </Form>
-      {/*<div>{t('createNewAiProvider.configTitle')}</div>*/}
-      {/*<Form className={cx(formItem)} form={form} items={configItems} itemsType={'flat'} />*/}
-    </Flexbox>
+    <FormModal
+      // className={cx(formItem)}
+      items={[
+        {
+          children: basicItems,
+          title: t('createNewAiProvider.basicTitle'),
+        },
+        {
+          children: configItems,
+          title: t('createNewAiProvider.configTitle'),
+        },
+      ]}
+      onFinish={onFinish}
+      open={open}
+      submitLoading={loading}
+      submitText={t('createNewAiProvider.confirm')}
+      title={
+        <Flexbox gap={8} horizontal>
+          <Icon icon={BrainIcon} />
+          {t('createNewAiProvider.title')}
+        </Flexbox>
+      }
+    />
   );
 });
 
-export default CreateForm;
+export default CreateNewProvider;
