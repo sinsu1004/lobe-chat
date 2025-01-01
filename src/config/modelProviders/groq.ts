@@ -170,6 +170,12 @@ const Groq: ModelProviderCard = {
     },
   ],
   checkModel: 'llama-3.1-8b-instant',
+  config: {
+    proxyUrl: {
+      placeholder: 'https://api.groq.com/openai/v1',
+    },
+    showModelFetcher: true,
+  },
   description:
     'Groq 的 LPU 推理引擎在最新的独立大语言模型（LLM）基准测试中表现卓越，以其惊人的速度和效率重新定义了 AI 解决方案的标准。Groq 是一种即时推理速度的代表，在基于云的部署中展现了良好的性能。',
   id: 'groq',

@@ -57,6 +57,11 @@ const Perplexity: ModelProviderCard = {
     },
   ],
   checkModel: 'llama-3.1-8b-instruct',
+  config: {
+    proxyUrl: {
+      placeholder: 'https://api.perplexity.ai',
+    },
+  },
   description:
     'Perplexity 是一家领先的对话生成模型提供商，提供多种先进的Llama 3.1模型，支持在线和离线应用，特别适用于复杂的自然语言处理任务。',
   id: 'perplexity',

@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 import Ai21Provider from '@/config/modelProviders/ai21';
 import Ai360Provider from '@/config/modelProviders/ai360';
 import AnthropicProvider from '@/config/modelProviders/anthropic';
@@ -70,8 +72,7 @@ const Page = async (props: PagePropsWithId) => {
   const params = await props.params;
 
   const builtinProviderCard = DEFAULT_MODEL_PROVIDER_LIST.find((v) => v.id === params.id);
-  if (!!builtinProviderCard)
-    return <ProviderDetail config={{}} source={'builtin'} {...builtinProviderCard} />;
+  if (!!builtinProviderCard) return <ProviderDetail source={'builtin'} {...builtinProviderCard} />;
 
   if (isServerMode) {
     const { userId } = await getUserAuth();
@@ -83,8 +84,9 @@ const Page = async (props: PagePropsWithId) => {
       KeyVaultsGateKeeper.getUserKeyVaults,
     );
 
-    console.log(userCard);
-    if (userCard) return <ProviderDetail {...userCard} />;
+    if (!userCard) return redirect('/settings/provider');
+
+    return <ProviderDetail {...userCard} />;
   }
 
   return <div>not found</div>;

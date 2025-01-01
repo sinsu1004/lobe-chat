@@ -17,11 +17,16 @@ import { FORM_STYLE } from '@/const/layoutTokens';
 import { AES_GCM_URL, BASE_PROVIDER_DOC_URL } from '@/const/url';
 import { isServerMode } from '@/const/version';
 import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
-import { AiProviderDetailItem } from '@/types/aiProvider';
+import {
+  AiProviderDetailItem,
+  AiProviderSourceEnum,
+  AiProviderSourceType,
+} from '@/types/aiProvider';
 
 import { KeyVaultsConfigKey, LLMProviderApiTokenKey, LLMProviderBaseUrlKey } from '../../const';
 import Checker from './Checker';
 import { SkeletonInput } from './SkeletonInput';
+import UpdateProviderInfo from './UpdateProviderInfo';
 
 const useStyles = createStyles(({ css, prefixCls, responsive, token }) => ({
   aceGcm: css`
@@ -80,7 +85,7 @@ const useStyles = createStyles(({ css, prefixCls, responsive, token }) => ({
   `,
 }));
 
-export interface ProviderConfigProps extends Omit<AiProviderDetailItem, 'enabled'> {
+export interface ProviderConfigProps extends Omit<AiProviderDetailItem, 'enabled' | 'source'> {
   apiKeyItems?: FormItemProps[];
   canDeactivate?: boolean;
   checkerItem?: FormItemProps;
@@ -95,6 +100,7 @@ export interface ProviderConfigProps extends Omit<AiProviderDetailItem, 'enabled
     showModelFetcher?: boolean;
   };
   showAceGcm?: boolean;
+  source?: AiProviderSourceType;
   title?: ReactNode;
 }
 
@@ -102,22 +108,24 @@ const ProviderConfig = memo<ProviderConfigProps>(
   ({
     apiKeyItems,
     id,
-    proxyUrl,
-    showApiKey = true,
+    config,
     checkModel,
-    canDeactivate = true,
     checkerItem,
     logo,
-    defaultShowBrowserRequest,
-    disableBrowserRequest,
     className,
     name,
     showAceGcm = true,
-    showChecker = true,
     extra,
-    source,
+    source = AiProviderSourceEnum.Builtin,
   }) => {
-    const { t } = useTranslation('setting');
+    const {
+      proxyUrl,
+      showApiKey = true,
+      defaultShowBrowserRequest,
+      disableBrowserRequest,
+      showChecker = true,
+    } = config;
+    const { t } = useTranslation('modelProvider');
     const [form] = Form.useForm();
     const { cx, styles } = useStyles();
 
@@ -152,6 +160,8 @@ const ProviderConfig = memo<ProviderConfigProps>(
 
     const { run: debouncedUpdate } = useDebounceFn(updateAiProviderConfig, { wait: 500 });
 
+    const isCustom = source === AiProviderSourceEnum.Custom;
+
     const apiKeyItem: FormItemProps[] = !showApiKey
       ? []
       : (apiKeyItems ?? [
@@ -161,11 +171,11 @@ const ProviderConfig = memo<ProviderConfigProps>(
             ) : (
               <Input.Password
                 autoComplete={'new-password'}
-                placeholder={t(`llm.apiKey.placeholder`, { name })}
+                placeholder={t(`providerModels.config.apiKey.placeholder`, { name })}
               />
             ),
-            desc: t(`llm.apiKey.desc`, { name }),
-            label: t(`llm.apiKey.title`),
+            desc: t(`providerModels.config.apiKey.desc`, { name }),
+            label: t(`providerModels.config.apiKey.title`),
             name: [KeyVaultsConfigKey, LLMProviderApiTokenKey],
           },
         ]);
@@ -174,7 +184,7 @@ const ProviderConfig = memo<ProviderConfigProps>(
       children: (
         <>
           <Icon icon={LockIcon} style={{ marginRight: 4 }} />
-          <Trans i18nKey="llm.aesGcm" ns={'setting'}>
+          <Trans i18nKey="providerModels.config.aesGcm" ns={'modelProvider'}>
             您的秘钥与代理地址等将使用
             <Link href={AES_GCM_URL} style={{ marginInline: 4 }} target={'_blank'}>
               AES-GCM
@@ -187,41 +197,55 @@ const ProviderConfig = memo<ProviderConfigProps>(
       minWidth: undefined,
     };
 
-    const showEndpoint = !!proxyUrl;
+    const showEndpoint = !!proxyUrl || isCustom;
 
-    const formItems = [
-      ...apiKeyItem,
-      showEndpoint && {
-        children: isLoading ? (
-          <SkeletonInput />
-        ) : (
-          <Input allowClear placeholder={proxyUrl?.placeholder} />
-        ),
-        desc: proxyUrl?.desc || t('llm.proxyUrl.desc'),
-        label: proxyUrl?.title || t('llm.proxyUrl.title'),
-        name: [KeyVaultsConfigKey, LLMProviderBaseUrlKey],
-      },
-      /*
-       * Conditions to show Client Fetch Switch
-       * 1. provider is not disabled browser request
-       * 2. provider show browser request by default
-       * 3. Provider allow to edit endpoint and the value of endpoint is not empty
-       * 4. There is an apikey provided by user
-       */
-      !disableBrowserRequest &&
-        (defaultShowBrowserRequest ||
-          (showEndpoint && isProviderEndpointNotEmpty) ||
-          (showApiKey && isProviderApiKeyNotEmpty)) && {
+    const endpointItem = showEndpoint
+      ? {
           children: isLoading ? (
-            <Skeleton.Button active className={styles.switchLoading} />
+            <SkeletonInput />
           ) : (
-            <Switch disabled={isLoading} value={isFetchOnClient} />
+            <Input
+              allowClear
+              placeholder={
+                (!!proxyUrl && proxyUrl?.placeholder) ||
+                t('providerModels.config.baseURL.placeholder')
+              }
+            />
           ),
-          desc: t('llm.fetchOnClient.desc'),
-          label: t('llm.fetchOnClient.title'),
-          minWidth: undefined,
-          name: 'fetchOnClient',
-        },
+          desc: (!!proxyUrl && proxyUrl?.desc) || t('providerModels.config.baseURL.desc'),
+          label: (!!proxyUrl && proxyUrl?.title) || t('providerModels.config.baseURL.title'),
+          name: [KeyVaultsConfigKey, LLMProviderBaseUrlKey],
+        }
+      : undefined;
+
+    /*
+     * Conditions to show Client Fetch Switch
+     * 1. provider is not disabled browser request
+     * 2. provider show browser request by default
+     * 3. Provider allow to edit endpoint and the value of endpoint is not empty
+     * 4. There is an apikey provided by user
+     */
+    const showClientFetch =
+      !disableBrowserRequest &&
+      (defaultShowBrowserRequest ||
+        (showEndpoint && isProviderEndpointNotEmpty) ||
+        (showApiKey && isProviderApiKeyNotEmpty));
+    const clientFetchItem = showClientFetch && {
+      children: isLoading ? (
+        <Skeleton.Button active className={styles.switchLoading} />
+      ) : (
+        <Switch disabled={isLoading} value={isFetchOnClient} />
+      ),
+      desc: t('providerModels.config.fetchOnClient.desc'),
+      label: t('providerModels.config.fetchOnClient.title'),
+      minWidth: undefined,
+      name: 'fetchOnClient',
+    };
+
+    const configItems = [
+      ...apiKeyItem,
+      endpointItem,
+      clientFetchItem,
       showChecker
         ? (checkerItem ?? {
             children: isLoading ? (
@@ -229,23 +253,61 @@ const ProviderConfig = memo<ProviderConfigProps>(
             ) : (
               <Checker model={checkModel!} provider={id} />
             ),
-            desc: t('llm.checker.desc'),
-            label: t('llm.checker.title'),
+            desc: t('providerModels.config.checker.desc'),
+            label: t('providerModels.config.checker.title'),
             minWidth: undefined,
           })
         : undefined,
       showAceGcm && isServerMode && aceGcmItem,
     ].filter(Boolean) as FormItemProps[];
 
+    const logoUrl = data?.logo ?? logo;
     const model: ItemGroup = {
-      children: formItems,
+      children: configItems,
 
       defaultActive: true,
 
       extra: (
         <Flexbox align={'center'} gap={8} horizontal>
           {extra}
-          <Tooltip title={t('llm.helpDoc')}>
+
+          {isCustom && <UpdateProviderInfo />}
+          {isLoading ? (
+            <Skeleton.Button active className={styles.switchLoading} />
+          ) : (
+            <InstantSwitch
+              enabled={enabled}
+              onChange={async (enabled) => {
+                await toggleProviderEnabled(id as any, enabled);
+              }}
+            />
+          )}
+        </Flexbox>
+      ),
+      title: (
+        <Flexbox
+          align={'center'}
+          gap={4}
+          horizontal
+          style={{
+            height: 24,
+            maxHeight: 24,
+            ...(enabled ? {} : { filter: 'grayscale(100%)', maxHeight: 24, opacity: 0.66 }),
+          }}
+        >
+          {isCustom ? (
+            <Flexbox align={'center'} gap={8} horizontal>
+              {logoUrl ? (
+                <Avatar avatar={logoUrl} shape={'circle'} size={32} title={name || id} />
+              ) : (
+                <ProviderCombine provider={'not-exist-provider'} size={24} />
+              )}
+              {name}
+            </Flexbox>
+          ) : (
+            <ProviderCombine provider={id} size={24} />
+          )}
+          <Tooltip title={t('providerModels.config.helpDoc')}>
             <Link
               href={urlJoin(BASE_PROVIDER_DOC_URL, id)}
               onClick={(e) => e.stopPropagation()}
@@ -256,42 +318,6 @@ const ProviderConfig = memo<ProviderConfigProps>(
               </Center>
             </Link>
           </Tooltip>
-          {canDeactivate ? (
-            isLoading ? (
-              <Skeleton.Button active className={styles.switchLoading} />
-            ) : (
-              <InstantSwitch
-                enabled={enabled}
-                onChange={async (enabled) => {
-                  await toggleProviderEnabled(id as any, enabled);
-                }}
-              />
-            )
-          ) : undefined}
-        </Flexbox>
-      ),
-      title: (
-        <Flexbox
-          align={'center'}
-          horizontal
-          style={{
-            height: 24,
-            maxHeight: 24,
-            ...(enabled ? {} : { filter: 'grayscale(100%)', maxHeight: 24, opacity: 0.66 }),
-          }}
-        >
-          {source === 'custom' ? (
-            <Flexbox align={'center'} gap={8} horizontal>
-              {logo ? (
-                <Avatar avatar={logo} shape={'circle'} size={32} title={name || id} />
-              ) : (
-                <ProviderCombine provider={'not-exist-provider'} size={24} />
-              )}
-              {name}
-            </Flexbox>
-          ) : (
-            <ProviderCombine provider={id} size={24} />
-          )}
         </Flexbox>
       ),
     };

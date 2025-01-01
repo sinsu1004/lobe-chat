@@ -278,6 +278,9 @@ const TogetherAI: ModelProviderCard = {
     },
   ],
   checkModel: 'meta-llama/Llama-Vision-Free',
+  config: {
+    showModelFetcher: true,
+  },
   description:
     'Together AI 致力于通过创新的 AI 模型实现领先的性能，提供广泛的自定义能力，包括快速扩展支持和直观的部署流程，满足企业的各种需求。',
   id: 'togetherai',

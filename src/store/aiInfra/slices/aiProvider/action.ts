@@ -11,6 +11,7 @@ import {
   AiProviderSourceEnum,
   CreateAiProviderParams,
   UpdateAiProviderConfigParams,
+  UpdateAiProviderParams,
 } from '@/types/aiProvider';
 
 const FETCH_AI_PROVIDER_LIST_KEY = 'FETCH_AI_PROVIDER';
@@ -19,14 +20,14 @@ const FETCH_ENABLED_AI_PROVIDER_KEY_VAULTS_KEY = 'FETCH_ENABLED_AI_PROVIDER_KEY_
 
 export interface AiProviderAction {
   createNewAiProvider: (params: CreateAiProviderParams) => Promise<void>;
+  deleteAiProvider: (id: string) => Promise<void>;
   internal_toggleAiProviderLoading: (id: string, loading: boolean) => void;
   refreshAiProviderDetail: () => Promise<void>;
   refreshAiProviderKeyVaults: () => Promise<void>;
   refreshAiProviderList: () => Promise<void>;
-
   removeAiProvider: (id: string) => Promise<void>;
   toggleProviderEnabled: (id: string, enabled: boolean) => Promise<void>;
-  updateAiProvider: (id: string, value: CreateAiProviderParams) => Promise<void>;
+  updateAiProvider: (id: string, value: UpdateAiProviderParams) => Promise<void>;
   updateAiProviderConfig: (id: string, value: UpdateAiProviderConfigParams) => Promise<void>;
   updateAiProviderSort: (items: AiProviderSortMap[]) => Promise<void>;
 
@@ -43,6 +44,11 @@ export const createAiProviderSlice: StateCreator<
 > = (set, get) => ({
   createNewAiProvider: async (params) => {
     await aiProviderService.createAiProvider({ ...params, source: AiProviderSourceEnum.Custom });
+    await get().refreshAiProviderList();
+  },
+  deleteAiProvider: async (id: string) => {
+    await aiProviderService.deleteAiProvider(id);
+
     await get().refreshAiProviderList();
   },
   internal_toggleAiProviderLoading: (id, loading) => {
@@ -83,6 +89,7 @@ export const createAiProviderSlice: StateCreator<
     get().internal_toggleAiProviderLoading(id, true);
     await aiProviderService.updateAiProvider(id, value);
     await get().refreshAiProviderList();
+    await get().refreshAiProviderDetail();
 
     get().internal_toggleAiProviderLoading(id, false);
   },

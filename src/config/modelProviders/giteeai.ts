@@ -112,6 +112,10 @@ const GiteeAI: ModelProviderCard = {
     },
   ],
   checkModel: 'Qwen2.5-72B-Instruct',
+  config: {
+    disableBrowserRequest: true,
+    showModelFetcher: true,
+  },
   description: 'Gitee AI 的 Serverless API 为 AI 开发者提供开箱即用的大模型推理 API 服务。',
   disableBrowserRequest: true,
   id: 'giteeai',

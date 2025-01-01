@@ -41,6 +41,12 @@ const Minimax: ModelProviderCard = {
     },
   ],
   checkModel: 'abab6.5s-chat',
+  config: {
+    smoothing: {
+      speed: 2,
+      text: true,
+    },
+  },
   description:
     'MiniMax 是 2021 年成立的通用人工智能科技公司，致力于与用户共创智能。MiniMax 自主研发了不同模态的通用大模型，其中包括万亿参数的 MoE 文本大模型、语音大模型以及图像大模型。并推出了海螺 AI 等应用。',
   id: 'minimax',

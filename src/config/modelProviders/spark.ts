@@ -63,6 +63,13 @@ const Spark: ModelProviderCard = {
     },
   ],
   checkModel: 'lite',
+  config: {
+    showModelFetcher: true,
+    smoothing: {
+      speed: 2,
+      text: true,
+    },
+  },
   description:
     '科大讯飞星火大模型提供多领域、多语言的强大 AI 能力，利用先进的自然语言处理技术，构建适用于智能硬件、智慧医疗、智慧金融等多种垂直场景的创新应用。',
   id: 'spark',

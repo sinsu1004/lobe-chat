@@ -124,6 +124,14 @@ const Stepfun: ModelProviderCard = {
     },
   ],
   checkModel: 'step-1-flash',
+  config: {
+    disableBrowserRequest: true,
+    showModelFetcher: true,
+    smoothing: {
+      speed: 2,
+      text: true,
+    },
+  },
   description:
     '阶级星辰大模型具备行业领先的多模态及复杂推理能力，支持超长文本理解和强大的自主调度搜索引擎功能。',
   // after test, currently https://api.stepfun.com/v1/chat/completions has the CORS issue

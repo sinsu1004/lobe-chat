@@ -9,7 +9,7 @@ import {
   UpdateAiProviderConfigParams,
 } from '@/types/aiProvider';
 
-import { AiProviderSelectItem, aiProviders } from '../../schemas';
+import { AiProviderSelectItem, aiModels, aiProviders } from '../../schemas';
 
 type DecryptUserKeyVaults = (encryptKeyVaultsStr: string | null) => Promise<any>;
 
@@ -48,9 +48,17 @@ export class AiProviderModel {
   };
 
   delete = async (id: string) => {
-    return this.db
-      .delete(aiProviders)
-      .where(and(eq(aiProviders.id, id), eq(aiProviders.userId, this.userId)));
+    return this.db.transaction(async (trx) => {
+      // 1. delete all models of the provider
+      await trx
+        .delete(aiModels)
+        .where(and(eq(aiModels.providerId, id), eq(aiModels.userId, this.userId)));
+
+      // 2. delete the provider
+      await trx
+        .delete(aiProviders)
+        .where(and(eq(aiProviders.id, id), eq(aiProviders.userId, this.userId)));
+    });
   };
 
   deleteAll = async () => {
@@ -157,7 +165,7 @@ export class AiProviderModel {
   getAiProviderById = async (
     id: string,
     decryptor: DecryptUserKeyVaults,
-  ): Promise<AiProviderDetailItem> => {
+  ): Promise<AiProviderDetailItem | undefined> => {
     const query = this.db
       .select({
         checkModel: aiProviders.checkModel,
@@ -165,8 +173,8 @@ export class AiProviderModel {
         enabled: aiProviders.enabled,
         id: aiProviders.id,
         keyVaults: aiProviders.keyVaults,
-        name: aiProviders.name,
         logo: aiProviders.logo,
+        name: aiProviders.name,
         source: aiProviders.source,
       })
       .from(aiProviders)
@@ -185,7 +193,7 @@ export class AiProviderModel {
         return { ...resultAgain[0] } as unknown as AiProviderDetailItem;
       }
 
-      throw new Error(`provider ${id} not found`);
+      return;
     }
 
     const decrypt = decryptor ?? JSON.parse;

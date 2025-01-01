@@ -1,5 +1,5 @@
 import { ActionIcon, Icon } from '@lobehub/ui';
-import {Button, Input, Skeleton, Space, Typography} from 'antd';
+import { Button, Input, Skeleton, Space, Typography } from 'antd';
 import { useTheme } from 'antd-style';
 import { CircleX, LucideRefreshCcwDot, PlusIcon, SearchIcon } from 'lucide-react';
 import { memo, useState } from 'react';
@@ -96,7 +96,11 @@ const ModelTitle = memo<ModelFetcherProps>(({ provider }) => {
                 loading={fetchRemoteModelsLoading}
                 onClick={async () => {
                   setFetchRemoteModelsLoading(true);
-                  await fetchRemoteModelList(provider);
+                  try {
+                    await fetchRemoteModelList(provider);
+                  } catch (e) {
+                    console.error(e);
+                  }
                   setFetchRemoteModelsLoading(false);
                 }}
                 size={'small'}

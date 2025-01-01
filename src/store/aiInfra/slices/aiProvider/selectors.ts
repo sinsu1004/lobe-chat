@@ -76,6 +76,7 @@ const providerKeyVaults = (provider: string | undefined) => (s: AIProviderStoreS
 };
 
 export const aiProviderSelectors = {
+  activeProviderConfig,
   disabledAiProviderList,
   enabledAiProviderList,
   isActiveProviderApiKeyNotEmpty,

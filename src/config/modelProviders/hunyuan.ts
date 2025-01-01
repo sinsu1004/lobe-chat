@@ -131,6 +131,10 @@ const Hunyuan: ModelProviderCard = {
     },
   ],
   checkModel: 'hunyuan-lite',
+  config: {
+    disableBrowserRequest: true,
+    showModelFetcher: true,
+  },
   description:
     '由腾讯研发的大语言模型，具备强大的中文创作能力，复杂语境下的逻辑推理能力，以及可靠的任务执行能力',
   disableBrowserRequest: true,

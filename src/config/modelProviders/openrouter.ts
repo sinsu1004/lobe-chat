@@ -41,7 +41,7 @@ const OpenRouter: ModelProviderCard = {
       },
       releasedAt: '2024-12-17',
       vision: true,
-    },    
+    },
     {
       contextWindowTokens: 128_000,
       description:
@@ -230,6 +230,9 @@ const OpenRouter: ModelProviderCard = {
     },
   ],
   checkModel: 'google/gemma-2-9b-it:free',
+  config: {
+    showModelFetcher: true,
+  },
   description:
     'OpenRouter 是一个提供多种前沿大模型接口的服务平台，支持 OpenAI、Anthropic、LLaMA 及更多，适合多样化的开发和应用需求。用户可根据自身需求灵活选择最优的模型和价格，助力AI体验的提升。',
   id: 'openrouter',

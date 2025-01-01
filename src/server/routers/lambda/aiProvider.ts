@@ -43,7 +43,7 @@ export const aiProviderRouter = router({
   getAiProviderById: aiProviderProcedure
     .input(z.object({ id: z.string() }))
 
-    .query(async ({ input, ctx }): Promise<AiProviderDetailItem> => {
+    .query(async ({ input, ctx }): Promise<AiProviderDetailItem | undefined> => {
       return ctx.aiProviderModel.getAiProviderById(input.id, KeyVaultsGateKeeper.getUserKeyVaults);
     }),
 
@@ -86,7 +86,7 @@ export const aiProviderRouter = router({
   }),
 
   removeAiProvider: aiProviderProcedure
-    .input(z.object({ id: z.string(), removeModels: z.boolean().optional() }))
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       return ctx.aiProviderModel.delete(input.id);
     }),

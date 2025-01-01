@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import { memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
-import { AiProviderListItem } from '@/types/aiProvider';
+import { AiProviderListItem, AiProviderSourceEnum } from '@/types/aiProvider';
 
 export const useStyles = createStyles(({ css, token }) => ({
   active: css`
@@ -43,13 +43,14 @@ const ProviderItem = memo<AiProviderListItem>(({ id, name, source, enabled, logo
 
   const activeKey = pathname.split('/').pop();
 
+  const isCustom = source === AiProviderSourceEnum.Custom;
   return (
     <Link
       className={cx(styles.container, activeKey === id && styles.active)}
       href={`/settings/provider/${id}`}
     >
       <Flexbox gap={8} horizontal>
-        {source === 'custom' && logo ? (
+        {isCustom && logo ? (
           <Avatar
             alt={name || id}
             avatar={logo}

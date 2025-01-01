@@ -77,6 +77,10 @@ const Cloudflare: ModelProviderCard = {
     },
   ],
   checkModel: '@hf/meta-llama/meta-llama-3-8b-instruct',
+  config: {
+    disableBrowserRequest: true,
+    showModelFetcher: true,
+  },
   description: '在 Cloudflare 的全球网络上运行由无服务器 GPU 驱动的机器学习模型。',
   disableBrowserRequest: true,
   id: 'cloudflare',

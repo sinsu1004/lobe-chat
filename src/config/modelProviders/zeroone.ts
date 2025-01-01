@@ -138,6 +138,7 @@ const ZeroOne: ModelProviderCard = {
     },
   ],
   checkModel: 'yi-lightning',
+  config: {},
   description:
     '零一万物致力于推动以人为本的AI 2.0技术革命，旨在通过大语言模型创造巨大的经济和社会价值，并开创新的AI生态与商业模式。',
   id: 'zeroone',

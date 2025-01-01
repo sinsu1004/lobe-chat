@@ -32,6 +32,15 @@ const Moonshot: ModelProviderCard = {
     },
   ],
   checkModel: 'moonshot-v1-8k',
+  config: {
+    proxyUrl: {
+      placeholder: 'https://api.moonshot.cn/v1',
+    },
+    smoothing: {
+      speed: 2,
+      text: true,
+    },
+  },
   description:
     'Moonshot 是由北京月之暗面科技有限公司推出的开源平台，提供多种自然语言处理模型，应用领域广泛，包括但不限于内容创作、学术研究、智能推荐、医疗诊断等，支持长文本处理和复杂生成任务。',
   id: 'moonshot',

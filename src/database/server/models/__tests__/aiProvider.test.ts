@@ -28,6 +28,7 @@ describe('AiProviderModel', () => {
       const params = {
         name: 'AiHubMix',
         id: 'aihubmix',
+        source: 'custom',
       } as const;
 
       const result = await aiProviderModel.create(params);
@@ -42,7 +43,11 @@ describe('AiProviderModel', () => {
   });
   describe('delete', () => {
     it('should delete a ai provider by id', async () => {
-      const { id } = await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix' });
+      const { id } = await aiProviderModel.create({
+        name: 'AiHubMix',
+        id: 'aihubmix',
+        source: 'custom',
+      });
 
       await aiProviderModel.delete(id);
 
@@ -54,8 +59,8 @@ describe('AiProviderModel', () => {
   });
   describe('deleteAll', () => {
     it('should delete all ai providers for the user', async () => {
-      await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix' });
-      await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix-2' });
+      await aiProviderModel.create({ name: 'AiHubMix', source: 'custom', id: 'aihubmix' });
+      await aiProviderModel.create({ name: 'AiHubMix', source: 'custom', id: 'aihubmix-2' });
 
       await aiProviderModel.deleteAll();
 
@@ -65,11 +70,15 @@ describe('AiProviderModel', () => {
       expect(userGroups).toHaveLength(0);
     });
     it('should only delete ai providers for the user, not others', async () => {
-      await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix' });
-      await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix-2' });
+      await aiProviderModel.create({ name: 'AiHubMix', source: 'custom', id: 'aihubmix' });
+      await aiProviderModel.create({ name: 'AiHubMix', source: 'custom', id: 'aihubmix-2' });
 
       const anotherAiProviderModel = new AiProviderModel(serverDB, 'user2');
-      await anotherAiProviderModel.create({ id: 'aihubmix', name: 'Another provider' });
+      await anotherAiProviderModel.create({
+        id: 'aihubmix',
+        source: 'custom',
+        name: 'Another provider',
+      });
 
       await aiProviderModel.deleteAll();
 
@@ -84,8 +93,8 @@ describe('AiProviderModel', () => {
 
   describe('query', () => {
     it('should query ai providers for the user', async () => {
-      await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix' });
-      await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix-2' });
+      await aiProviderModel.create({ name: 'AiHubMix', source: 'custom', id: 'aihubmix' });
+      await aiProviderModel.create({ name: 'AiHubMix', source: 'custom', id: 'aihubmix-2' });
 
       const userGroups = await aiProviderModel.query();
       expect(userGroups).toHaveLength(2);
@@ -96,7 +105,11 @@ describe('AiProviderModel', () => {
 
   describe('findById', () => {
     it('should find a ai provider by id', async () => {
-      const { id } = await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix' });
+      const { id } = await aiProviderModel.create({
+        name: 'AiHubMix',
+        source: 'custom',
+        id: 'aihubmix',
+      });
 
       const group = await aiProviderModel.findById(id);
       expect(group).toMatchObject({
@@ -109,7 +122,11 @@ describe('AiProviderModel', () => {
 
   describe('update', () => {
     it('should update a ai provider', async () => {
-      const { id } = await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix' });
+      const { id } = await aiProviderModel.create({
+        name: 'AiHubMix',
+        source: 'custom',
+        id: 'aihubmix',
+      });
 
       await aiProviderModel.update(id, { name: 'Updated Test Group', sort: 3 });
 
@@ -127,8 +144,16 @@ describe('AiProviderModel', () => {
 
   describe('updateOrder', () => {
     it('should update order of ai providers', async () => {
-      const group1 = await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix' });
-      const group2 = await aiProviderModel.create({ name: 'AiHubMix', id: 'aihubmix-2' });
+      const group1 = await aiProviderModel.create({
+        name: 'AiHubMix',
+        source: 'custom',
+        id: 'aihubmix',
+      });
+      const group2 = await aiProviderModel.create({
+        name: 'AiHubMix',
+        source: 'custom',
+        id: 'aihubmix-2',
+      });
 
       await aiProviderModel.updateOrder([
         { id: group1.id, sort: 3 },

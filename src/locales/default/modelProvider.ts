@@ -79,9 +79,9 @@ export default {
       title: '服务商简介',
     },
     id: {
-      placeholder: '建议全小写，例如 openai',
+      placeholder: '建议全小写，例如 openai，创建后将不可修改',
       required: '请填写服务商 ID',
-      title: '服务商唯一 ID',
+      title: '服务商 ID',
     },
     logo: {
       required: '请上传正确的服务商 Logo',
@@ -190,6 +190,31 @@ export default {
     },
   },
   providerModels: {
+    config: {
+      aesGcm: '您的秘钥与代理地址等将使用 <1>AES-GCM</1> 加密算法进行加密',
+      apiKey: {
+        desc: '请填写你的 {{name}} API Key',
+        placeholder: '{{name}} API Key',
+        title: 'API Key',
+      },
+      baseURL: {
+        desc: '必须包含 http(s)://',
+        placeholder: 'https://your-proxy-url.com/v1',
+        title: 'API 代理地址',
+      },
+      checker: {
+        button: '检查',
+        desc: '测试 Api Key 与代理地址是否正确填写',
+        pass: '检查通过',
+        title: '连通性检查',
+      },
+      fetchOnClient: {
+        desc: '客户端请求模式将从浏览器直接发起会话请求，可提升响应速度',
+        title: '使用客户端请求模式',
+      },
+      helpDoc: '配置教程',
+      waitingForMore: '更多模型正在 <1>计划接入</1> 中，敬请期待',
+    },
     createNew: {
       title: '创建自定义 AI 模型',
     },
@@ -244,13 +269,18 @@ export default {
       disabled: '未启用',
       enabled: '已启用',
     },
-
     searchNotFound: '未找到搜索结果',
   },
   sortModal: {
     success: '排序更新成功',
     title: '自定义排序',
     update: '更新',
+  },
+  updateAiProvider: {
+    confirmDelete: '即将删除该 AI 服务商，删除后将无法找回，确认是否删除？',
+    deleteSuccess: '删除成功',
+    tooltip: '更新服务商基础配置',
+    updateSuccess: '更新成功',
   },
   wenxin: {
     accessKey: {

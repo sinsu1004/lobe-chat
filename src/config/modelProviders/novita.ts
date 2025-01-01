@@ -108,6 +108,10 @@ const Novita: ModelProviderCard = {
     },
   ],
   checkModel: 'meta-llama/llama-3.1-8b-instruct',
+  config: {
+    disableBrowserRequest: true,
+    showModelFetcher: true,
+  },
   description:
     'Novita AI 是一个提供多种大语言模型与 AI 图像生成的 API 服务的平台，灵活、可靠且具有成本效益。它支持 Llama3、Mistral 等最新的开源模型，并为生成式 AI 应用开发提供了全面、用户友好且自动扩展的 API 解决方案，适合 AI 初创公司的快速发展。',
   disableBrowserRequest: true,

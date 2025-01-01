@@ -1,6 +1,6 @@
 import { FormModal, Icon } from '@lobehub/ui';
 import type { FormItemProps } from '@lobehub/ui/es/Form/components/FormItem';
-import { App, Input, Radio } from 'antd';
+import { App, Button, Input } from 'antd';
 import { BrainIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useState } from 'react';
@@ -8,29 +8,33 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { useAiInfraStore } from '@/store/aiInfra/store';
-import { CreateAiProviderParams } from '@/types/aiProvider';
-
-import { KeyVaultsConfigKey, LLMProviderApiTokenKey, LLMProviderBaseUrlKey } from '../../const';
+import { AiProviderDetailItem, UpdateAiProviderParams } from '@/types/aiProvider';
 
 interface CreateNewProviderProps {
+  id: string;
+  initialValues: AiProviderDetailItem;
   onClose?: () => void;
   open?: boolean;
 }
 
-const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
-  const { t } = useTranslation('modelProvider');
+const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open, initialValues, id }) => {
+  const { t } = useTranslation(['modelProvider', 'common']);
   const [loading, setLoading] = useState(false);
-  const createNewAiProvider = useAiInfraStore((s) => s.createNewAiProvider);
-  const { message } = App.useApp();
+  const [updateAiProvider, deleteAiProvider] = useAiInfraStore((s) => [
+    s.updateAiProvider,
+    s.deleteAiProvider,
+  ]);
+
+  const { message, modal } = App.useApp();
   const router = useRouter();
-  const onFinish = async (values: CreateAiProviderParams) => {
+
+  const onFinish = async (values: UpdateAiProviderParams) => {
     setLoading(true);
 
     try {
-      await createNewAiProvider(values);
+      await updateAiProvider(id, values);
       setLoading(false);
-      router.push(`/settings/provider/${values.id}`);
-      message.success(t('createNewAiProvider.createSuccess'));
+      message.success(t('updateAiProvider.updateSuccess'));
       onClose?.();
     } catch (e) {
       console.error(e);
@@ -40,12 +44,9 @@ const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
 
   const basicItems: FormItemProps[] = [
     {
-      children: (
-        <Input autoFocus placeholder={t('createNewAiProvider.id.placeholder')} variant={'filled'} />
-      ),
+      children: initialValues.id,
       label: t('createNewAiProvider.id.title'),
       minWidth: 400,
-      name: 'id',
       rules: [{ message: t('createNewAiProvider.id.required'), required: true }],
     },
     {
@@ -77,60 +78,51 @@ const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
     },
   ];
 
-  const configItems: FormItemProps[] = [
-    {
-      children: (
-        <Radio.Group
-          options={[
-            { label: 'OpenAI', value: 'openai' },
-            { label: 'Anthropic', value: 'anthropic' },
-          ]}
-        />
-      ),
-      label: t('createNewAiProvider.sdkType.title'),
-      name: 'sdkType',
-      rules: [{ message: t('createNewAiProvider.sdkType.required'), required: true }],
-    },
-    {
-      children: (
-        <Input.Password
-          autoComplete={'new-password'}
-          placeholder={t('createNewAiProvider.apiKey.placeholder')}
-          variant={'filled'}
-        />
-      ),
-      label: t('createNewAiProvider.apiKey.title'),
-      minWidth: 400,
-      name: [KeyVaultsConfigKey, LLMProviderApiTokenKey],
-      rules: [{ message: t('createNewAiProvider.apiKey.required'), required: true }],
-    },
-    {
-      children: <Input allowClear placeholder={'https://xxxx-proxy.com/v1'} variant={'filled'} />,
-      desc: t('createNewAiProvider.proxyUrl.placeholder'),
-      label: t('createNewAiProvider.proxyUrl.title'),
-      minWidth: 400,
-      name: [KeyVaultsConfigKey, LLMProviderBaseUrlKey],
-    },
-  ];
-
   return (
     <FormModal
-      destroyOnClose
+      footer={
+        <Flexbox horizontal justify={'space-between'}>
+          <Button
+            danger
+            disabled={loading}
+            onClick={() => {
+              modal.confirm({
+                okButtonProps: {
+                  danger: true,
+                },
+                okText: t('delete', { ns: 'common' }),
+                onOk: async () => {
+                  await deleteAiProvider(id);
+                  router.push('/settings/provider');
+
+                  onClose?.();
+                  message.success(t('updateAiProvider.deleteSuccess'));
+                },
+                title: t('updateAiProvider.confirmDelete'),
+              });
+            }}
+            type={'primary'}
+          >
+            {t('delete', { ns: 'common' })}
+          </Button>
+          <Flexbox gap={8} horizontal>
+            <Button htmlType={'submit'} loading={loading} type={'primary'}>
+              {t('update', { ns: 'common' })}
+            </Button>
+          </Flexbox>
+        </Flexbox>
+      }
+      initialValues={initialValues}
       items={[
         {
           children: basicItems,
           title: t('createNewAiProvider.basicTitle'),
-        },
-        {
-          children: configItems,
-          title: t('createNewAiProvider.configTitle'),
         },
       ]}
       onCancel={onClose}
       onFinish={onFinish}
       open={open}
       scrollToFirstError={{ behavior: 'instant', block: 'end', focus: true }}
-      submitLoading={loading}
       submitText={t('createNewAiProvider.confirm')}
       title={
         <Flexbox gap={8} horizontal>

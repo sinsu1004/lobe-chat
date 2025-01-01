@@ -118,6 +118,10 @@ const SenseNova: ModelProviderCard = {
     },
   ],
   checkModel: 'SenseChat-Turbo',
+  config: {
+    disableBrowserRequest: true,
+    showModelFetcher: true,
+  },
   description: '商汤日日新，依托商汤大装置的强大的基础支撑，提供高效易用的全栈大模型服务。',
   disableBrowserRequest: true,
   id: 'sensenova',

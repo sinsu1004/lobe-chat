@@ -31,6 +31,9 @@ const Upstage: ModelProviderCard = {
     },
   ],
   checkModel: 'solar-1-mini-chat',
+  config: {
+    showModelFetcher: true,
+  },
   description:
     'Upstage 专注于为各种商业需求开发AI模型，包括 Solar LLM 和文档 AI，旨在实现工作的人造通用智能（AGI）。通过 Chat API 创建简单的对话代理，并支持功能调用、翻译、嵌入以及特定领域应用。',
   id: 'upstage',

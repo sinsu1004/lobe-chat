@@ -30,6 +30,10 @@ const InternLM: ModelProviderCard = {
     },
   ],
   checkModel: 'internlm2.5-latest',
+  config: {
+    disableBrowserRequest: true,
+    showModelFetcher: true,
+  },
   description:
     '致力于大模型研究与开发工具链的开源组织。为所有 AI 开发者提供高效、易用的开源平台，让最前沿的大模型与算法技术触手可及',
   disableBrowserRequest: true,

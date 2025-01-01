@@ -57,6 +57,12 @@ const XAI: ModelProviderCard = {
     },
   ],
   checkModel: 'grok-2-1212',
+  config: {
+    proxyUrl: {
+      placeholder: 'https://api.x.ai/v1',
+    },
+    showModelFetcher: true,
+  },
   description:
     'xAI 是一家致力于构建人工智能以加速人类科学发现的公司。我们的使命是推动我们对宇宙的共同理解。',
   id: 'xai',
