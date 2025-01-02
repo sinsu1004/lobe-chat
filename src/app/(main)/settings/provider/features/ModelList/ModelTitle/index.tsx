@@ -1,7 +1,7 @@
 import { ActionIcon, Icon } from '@lobehub/ui';
-import { Button, Input, Skeleton, Space, Typography } from 'antd';
+import { Button, Skeleton, Space, Typography } from 'antd';
 import { useTheme } from 'antd-style';
-import { CircleX, LucideRefreshCcwDot, PlusIcon, SearchIcon } from 'lucide-react';
+import { CircleX, LucideRefreshCcwDot, PlusIcon } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
@@ -9,7 +9,8 @@ import { Flexbox } from 'react-layout-kit';
 import { useAiInfraStore } from '@/store/aiInfra';
 import { aiModelSelectors } from '@/store/aiInfra/selectors';
 
-import CreateNewModelModal from './CreateNewModelModal';
+import CreateNewModelModal from '../CreateNewModelModal';
+import Search from './Search';
 
 interface ModelFetcherProps {
   provider: string;
@@ -80,13 +81,10 @@ const ModelTitle = memo<ModelFetcherProps>(({ provider }) => {
         ) : (
           <Flexbox gap={8} horizontal>
             {totalModels >= 30 && (
-              <Input
-                onChange={(e) => {
-                  useAiInfraStore.setState({ modelSearchKeyword: e.target.value });
+              <Search
+                onChange={(value) => {
+                  useAiInfraStore.setState({ modelSearchKeyword: value });
                 }}
-                placeholder={'搜索模型...'}
-                prefix={<Icon icon={SearchIcon} />}
-                size={'small'}
                 value={searchKeyword}
               />
             )}

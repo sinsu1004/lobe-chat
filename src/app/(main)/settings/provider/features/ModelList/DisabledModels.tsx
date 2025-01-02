@@ -15,16 +15,14 @@ const DisabledModels = memo(() => {
   const disabledModels = useAiInfraStore(aiModelSelectors.disabledAiProviderModelList, isEqual);
 
   return (
-    disabledModels.length > 0 && (
-      <Flexbox>
-        <Typography.Text style={{ fontSize: 12, marginTop: 8 }} type={'secondary'}>
-          {t('providerModels.list.disabled')}
-        </Typography.Text>
-        {disabledModels.map((item) => (
-          <ModelItem {...item} key={item.id} />
-        ))}
-      </Flexbox>
-    )
+    <Flexbox>
+      <Typography.Text style={{ fontSize: 12, marginTop: 8 }} type={'secondary'}>
+        {t('providerModels.list.disabled')}
+      </Typography.Text>
+      {disabledModels.map((item) => (
+        <ModelItem {...item} key={item.id} />
+      ))}
+    </Flexbox>
   );
 });
 

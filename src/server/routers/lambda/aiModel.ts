@@ -36,6 +36,16 @@ const aiModelProcedure = authedProcedure.use(async (opts) => {
 });
 
 export const aiModelRouter = router({
+  batchDisableAiModels: aiModelProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        models: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return ctx.aiModelModel.batchDisableAiModels(input.id, input.models);
+    }),
   batchUpdateAiModels: aiModelProcedure
     .input(
       z.object({

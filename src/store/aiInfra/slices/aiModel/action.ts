@@ -15,11 +15,13 @@ import {
 const FETCH_AI_PROVIDER_MODEL_LIST_KEY = 'FETCH_AI_PROVIDER_MODELS';
 
 export interface AiModelAction {
+  batchDisableAiModels: (ids: string[]) => Promise<void>;
   batchUpdateAiModels: (models: AiProviderModelListItem[]) => Promise<void>;
   clearRemoteModels: (provider: string) => Promise<void>;
   createNewAiModel: (params: CreateAiModelParams) => Promise<void>;
   fetchRemoteModelList: (providerId: string) => Promise<void>;
   internal_toggleAiModelLoading: (id: string, loading: boolean) => void;
+
   refreshAiModelList: () => Promise<void>;
   removeAiModel: (id: string, providerId: string) => Promise<void>;
   toggleModelEnabled: (params: Omit<ToggleAiModelEnableParams, 'providerId'>) => Promise<void>;
@@ -39,6 +41,13 @@ export const createAiModelSlice: StateCreator<
   [],
   AiModelAction
 > = (set, get) => ({
+  batchDisableAiModels: async (ids) => {
+    const { activeAiProvider } = get();
+    if (!activeAiProvider) return;
+
+    await aiModelService.batchDisableAiModels(activeAiProvider, ids);
+    await get().refreshAiModelList();
+  },
   batchUpdateAiModels: async (models) => {
     const { activeAiProvider: id } = get();
     if (!id) return;

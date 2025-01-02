@@ -32,6 +32,10 @@ class AiModelService {
     return lambdaClient.aiModel.batchUpdateAiModels.mutate({ id, models });
   };
 
+  batchDisableAiModels = async (id: string, models: string[]) => {
+    return lambdaClient.aiModel.batchDisableAiModels.mutate({ id, models });
+  };
+
   clearRemoteModels = async (providerId: string) => {
     return lambdaClient.aiModel.clearRemoteModels.mutate({ providerId });
   };

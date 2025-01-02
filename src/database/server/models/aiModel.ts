@@ -1,4 +1,4 @@
-import { and, asc, desc, eq } from 'drizzle-orm/expressions';
+import { and, asc, desc, eq, inArray } from 'drizzle-orm/expressions';
 import pMap from 'p-map';
 
 import { LobeChatDatabase } from '@/database/type';
@@ -148,13 +148,6 @@ export class AiModelModel {
       const insertedIds = new Set(insertedRecords.map((r) => r.id));
       const recordsToUpdate = records.filter((r) => !insertedIds.has(r.id));
 
-      console.log(
-        'insertedRecords:',
-        insertedRecords.length,
-        'recordsToUpdate:',
-        recordsToUpdate.length,
-      );
-
       // 第三步：更新已存在的记录
       if (recordsToUpdate.length > 0) {
         await pMap(
@@ -178,6 +171,19 @@ export class AiModelModel {
         );
       }
     });
+  };
+
+  batchDisableAiModels = async (providerId: string, models: string[]) => {
+    return this.db
+      .update(aiModels)
+      .set({ enabled: false })
+      .where(
+        and(
+          eq(aiModels.providerId, providerId),
+          inArray(aiModels.id, models),
+          eq(aiModels.userId, this.userId),
+        ),
+      );
   };
 
   clearRemoteModels(providerId: string) {

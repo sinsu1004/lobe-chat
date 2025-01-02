@@ -268,6 +268,12 @@ export default {
     list: {
       disabled: '未启用',
       enabled: '已启用',
+      enabledActions: {
+        disableAll: '全部禁用',
+        sort: '自定义模型排序',
+      },
+      enabledEmpty: '暂无启用模型，请从下方列表中启用心仪的模型~',
+      search: '搜索模型...',
     },
     searchNotFound: '未找到搜索结果',
   },
